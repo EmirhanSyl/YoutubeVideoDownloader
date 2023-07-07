@@ -37,6 +37,11 @@ print("Length of video: ",yt.length,"seconds")
 print("Description: ",yt.description)
 print("Ratings: ",yt.rating)
 
+with open('videoInfo.txt', 'w') as file:
+    file.write("Thumbnail: " + yt.thumbnail_url)
+    file.write("\nTitle: " + yt.title)
+    file.write("\nLength: " + str(yt.length))
+
 for stream in yt.streams.filter(only_audio=True):
     print(stream)
 
@@ -58,7 +63,9 @@ for stream in only_audio_Streamings:
         'url': stream.url,
         'itag': stream.itag,
         'mime_type': stream.mime_type,
-        # Add other required attributes here
+        # 'resolution': stream.resolution,
+        'abr': stream.fps if hasattr(stream, 'fps') else stream.abr,
+        # 'vcodec&acodec': stream.vcodec if hasattr(stream, 'vcodec') else None,
     })
 
 only_video_data = []
@@ -67,7 +74,9 @@ for stream in only_video_Streamings:
         'url': stream.url,
         'itag': stream.itag,
         'mime_type': stream.mime_type,
-        # Add other required attributes here
+        'resolution': stream.resolution,
+        'fps': stream.fps,
+        # 'vcodec': stream.vcodec,
     })
 
 progressive_data = []
@@ -76,7 +85,9 @@ for stream in progressive_Streamings:
         'url': stream.url,
         'itag': stream.itag,
         'mime_type': stream.mime_type,
-        # Add other required attributes here
+        'resolution': stream.resolution,
+        'fps': stream.fps,
+        # 'vcodec': stream.vcodec,
     })
 
 # Create a dictionary with the extracted data

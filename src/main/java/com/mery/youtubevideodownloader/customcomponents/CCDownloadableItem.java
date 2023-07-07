@@ -15,19 +15,19 @@ import java.util.logging.Logger;
 public class CCDownloadableItem extends javax.swing.JPanel {
 
     private final int itag;
-    private final String videoRes;
+    private final String res;
     private final String fileType;
 
     private String link;
 
-    public CCDownloadableItem(String videoRes, String fileType, int itag) {
+    public CCDownloadableItem(String res, String fileType, int itag) {
         initComponents();
-        this.videoRes = videoRes;
+        this.res = res;
         this.fileType = fileType;
         this.itag = itag;
-        link = MainFrame.instance.getVideoUrl();
+        //link = MainFrame.instance.getVideoUrl();
 
-        videoResLabel.setText(videoRes);
+        videoResLabel.setText(res);
         fileTypeLabel.setText(fileType);
     }
 
@@ -58,24 +58,24 @@ public class CCDownloadableItem extends javax.swing.JPanel {
                 downloadButtonActionPerformed(evt);
             }
         });
-        jPanel1.add(downloadButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 10, 168, 40));
+        jPanel1.add(downloadButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 10, 168, 40));
 
         videoResLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         videoResLabel.setForeground(new java.awt.Color(0, 0, 0));
         videoResLabel.setText("1080P HD");
         videoResLabel.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 0, 1, new java.awt.Color(0, 0, 0)));
-        jPanel1.add(videoResLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 12, 137, 33));
+        jPanel1.add(videoResLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 12, 150, 33));
 
         fileTypeLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         fileTypeLabel.setForeground(new java.awt.Color(0, 0, 0));
         fileTypeLabel.setText("MP4");
-        jPanel1.add(fileTypeLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(175, 16, 196, -1));
+        jPanel1.add(fileTypeLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 15, 160, 30));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 555, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

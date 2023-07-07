@@ -1,6 +1,10 @@
 package com.mery.youtubevideodownloader;
 
 import com.mery.youtubevideodownloader.core.Config;
+import com.mery.youtubevideodownloader.core.IPage;
+import java.awt.Dimension;
+import javax.swing.ImageIcon;
+import javax.swing.JPanel;
 
 /**
  *
@@ -18,6 +22,18 @@ public class MainFrame extends javax.swing.JFrame {
         initComponents();
         
         downloadPanel = new DownloadPanel();
+        
+        config = new Config("", System.getProperty("user.dir") + "\\PythonDownloader\\");
+        this.add(mainPanel);
+        
+        setPage(downloadPanel);        
+        
+        this.setPreferredSize(new Dimension(1200, 600));
+        this.setResizable(false);
+        this.setLocationRelativeTo(null);
+        
+        ImageIcon icon = new ImageIcon("C:\\Users\\emirs\\Desktop\\pics\\appIcons\\logo.png");
+        this.setIconImage(icon.getImage());
     }
     
     public DownloadPanel getDownloadPanel(){
@@ -37,13 +53,41 @@ public class MainFrame extends javax.swing.JFrame {
     public void setConfig(Config config){
         this.config = config;
     }
+    
+    public final void setPage(JPanel page) {
+        mainPanel.removeAll();
+        mainPanel.add(page);
+        mainPanel.revalidate();
+        mainPanel.repaint();
+        System.out.println("Page Setted!");
+
+        if (page instanceof IPage) {
+            IPage iPage = (IPage) page;
+            iPage.onPageSetted();
+        }
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        mainPanel = new javax.swing.JPanel();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        mainPanel.setBackground(new java.awt.Color(255, 255, 255));
+        mainPanel.setForeground(new java.awt.Color(255, 255, 255));
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 1200, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
+        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -83,5 +127,6 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel mainPanel;
     // End of variables declaration//GEN-END:variables
 }
