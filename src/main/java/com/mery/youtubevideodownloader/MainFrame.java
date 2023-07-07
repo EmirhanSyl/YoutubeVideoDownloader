@@ -1,14 +1,41 @@
 package com.mery.youtubevideodownloader;
 
+import com.mery.youtubevideodownloader.core.Config;
+
 /**
  *
  * @author emirs
  */
 public class MainFrame extends javax.swing.JFrame {
 
+    public static MainFrame instance; 
+    private final DownloadPanel downloadPanel;
+    
+    private Config config;
+    private String videoUrl;
 
     public MainFrame() {
         initComponents();
+        
+        downloadPanel = new DownloadPanel();
+    }
+    
+    public DownloadPanel getDownloadPanel(){
+        return downloadPanel;
+    }
+    
+    public String getVideoUrl(){
+        return videoUrl;
+    }
+    public void setVideoUrl(String videoUrl){
+        this.videoUrl = videoUrl;
+    }
+    
+    public Config getConfig(){
+        return config;
+    }
+    public void setConfig(Config config){
+        this.config = config;
     }
 
     @SuppressWarnings("unchecked")
@@ -48,7 +75,9 @@ public class MainFrame extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new MainFrame().setVisible(true);
+                // ---------------- SINGLETON -----------------
+                instance = new MainFrame();
+                instance.setVisible(true);
             }
         });
     }
