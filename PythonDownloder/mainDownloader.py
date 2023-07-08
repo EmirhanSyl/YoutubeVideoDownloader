@@ -1,4 +1,4 @@
-import sys
+import re
 import os
 import argparse
 import json
@@ -120,5 +120,8 @@ else:
     ys = yt.streams.get_by_itag(itag)
 
 if download:
-    ys.download(save_location)
+    sanitized_title = re.sub(r'[<>:"/\\|?*]', '', yt.title)
+    file_format = ys.mime_type.split('/')[-1]
+    file_name = f"{sanitized_title}_{ys.itag}.{file_format}"
+    ys.download(output_path=save_location, filename=file_name)
     print("Content Downloaded!")

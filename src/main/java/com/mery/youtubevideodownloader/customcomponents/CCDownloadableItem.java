@@ -88,12 +88,14 @@ public class CCDownloadableItem extends javax.swing.JPanel {
     }//GEN-LAST:event_downloadButtonActionPerformed
 
     private void executeDownloadCommand() {
-        Config conf = MainFrame.instance.getConfig();
         
         try {
-            String command = conf.interpreterLocation + " " + conf.pyModuleLocation + "mainDownloader.py --videourl \"" + link + "\"" + " --download --itag " + itag;
+            String command = Config.interpreterLocation + " " + Config.pyModuleLocation 
+                    + "mainDownloader.py --videourl \"" + link + "\"" + " --download --itag " + itag 
+                    + " --location \"" + Config.downloadLocation + "\\" + MainFrame.instance.getTitle() + "\"";
+            
             Runtime runtime = Runtime.getRuntime();
-            System.out.println("Command: " + command);
+            System.out.println("Download Command: " + command);
             Process process = runtime.exec(command);
             
             // Read the output from the process

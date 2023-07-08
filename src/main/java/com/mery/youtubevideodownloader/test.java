@@ -18,7 +18,12 @@ import java.util.logging.Logger;
  */
 public class test {
     public static void main(String[] args) {
-        executeDownloadCommand();
+        //executeDownloadCommand();
+        //Config.updateConfigFile("", System.getProperty("user.dir") + "\\PythonDownloder\\", "E:\\Anaconda\\python.exe");
+        //Config.getConfigsFromFile();
+        //System.out.println(Config.downloadLocation);
+        //System.out.println(Config.interpreterLocation);
+        //System.out.println(Config.pyModuleLocation);
     }
     
      private static void executeDownloadCommand() {

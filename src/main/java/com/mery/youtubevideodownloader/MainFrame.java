@@ -3,9 +3,6 @@ package com.mery.youtubevideodownloader;
 import com.mery.youtubevideodownloader.core.Config;
 import com.mery.youtubevideodownloader.core.IPage;
 import java.awt.Dimension;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
@@ -17,16 +14,24 @@ public class MainFrame extends javax.swing.JFrame {
 
     public static MainFrame instance; 
     private final DownloadPanel downloadPanel;
+    private final SettingsPanel settingsPanel;
     
-    private Config config;
     private String videoUrl;
+    private String videoTitle;
 
     public MainFrame() {
         initComponents();
         
         downloadPanel = new DownloadPanel();
+        settingsPanel = new SettingsPanel();
         
-        config = new Config("", System.getProperty("user.dir") + "\\PythonDownloder\\", "E:\\Anaconda\\python.exe");
+        if (!Config.isConfigFileExist()) {
+            Config.initConfigFileWithDefaultOptions();
+            Config.interpreterLocation = "E:\\Anaconda\\python.exe";
+        }else{
+            Config.getConfigsFromFile();
+        }
+        
         this.add(mainPanel);
         setPage(downloadPanel);        
         
@@ -34,27 +39,19 @@ public class MainFrame extends javax.swing.JFrame {
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         
-        ImageIcon icon = new ImageIcon("C:\\Users\\emirs\\Desktop\\pics\\appIcons\\logo.png");
+        ImageIcon icon = new ImageIcon(System.getProperty("user.dir") + "\\assets\\icons\\download.png");
         this.setIconImage(icon.getImage());
     }
     
-    public DownloadPanel getDownloadPanel(){
-        return downloadPanel;
-    }
+    public DownloadPanel getDownloadPanel(){return downloadPanel;}
+    public SettingsPanel getSettingsPanel() {return settingsPanel;}
     
-    public String getVideoUrl(){
-        return videoUrl;
-    }
-    public void setVideoUrl(String videoUrl){
-        this.videoUrl = videoUrl;
-    }
+    public String getVideoUrl(){return videoUrl;}
+    public void setVideoUrl(String videoUrl){this.videoUrl = videoUrl;}
     
-    public Config getConfig(){
-        return config;
-    }
-    public void setConfig(Config config){
-        this.config = config;
-    }
+    public String getVideoTitle(){return videoTitle;}
+    public void gstVideoTitle(String videoTitle){this.videoTitle = videoTitle;}
+    
     
     public final void setPage(JPanel page) {
         mainPanel.removeAll();
@@ -131,4 +128,6 @@ public class MainFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel mainPanel;
     // End of variables declaration//GEN-END:variables
+
+    
 }

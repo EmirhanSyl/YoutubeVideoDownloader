@@ -14,7 +14,7 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
 
 /**
  *
- * @author RAVEN (https://www.youtube.com/watch?v=gxhTjQMqjJY)
+ * @author RAVEN ( https://www.youtube.com/watch?v=gxhTjQMqjJY )
  */
 public class CCModernScrollBar extends BasicScrollBarUI {
 

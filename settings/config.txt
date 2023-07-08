@@ -1,0 +1,3 @@
+C:\Users\emirs\Desktop
+C:\Users\emirs\Documents\NetBeansProjects\YoutubeVideoDownloader\PythonDownloder\
+E:\Anaconda\python.exe
