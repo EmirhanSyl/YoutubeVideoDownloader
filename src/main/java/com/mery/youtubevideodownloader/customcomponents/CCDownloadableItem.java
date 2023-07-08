@@ -91,7 +91,7 @@ public class CCDownloadableItem extends javax.swing.JPanel {
         Config conf = MainFrame.instance.getConfig();
         
         try {
-            String command = conf.interpreterLocation + " mainDownloader.py --videourl \"" + link + "\"" + " --Download + --location \"" + conf.downloadLocation + "\" --itag " + itag;
+            String command = conf.interpreterLocation + " " + conf.pyModuleLocation + "mainDownloader.py --videourl \"" + link + "\"" + " --Download + --location \"" + conf.downloadLocation + "\" --itag " + itag;
             Runtime runtime = Runtime.getRuntime();
             Process process = runtime.exec(command);
             

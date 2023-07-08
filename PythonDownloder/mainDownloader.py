@@ -1,4 +1,5 @@
 import sys
+import os
 import argparse
 import json
 
@@ -37,10 +38,13 @@ print("Length of video: ",yt.length,"seconds")
 print("Description: ",yt.description)
 print("Ratings: ",yt.rating)
 
-with open('videoInfo.txt', 'w') as file:
+# Absolute path of the output file
+output_file = os.path.join(os.path.dirname(__file__), 'videoInfo.txt')
+with open(output_file, 'w') as file:
     file.write("Thumbnail: " + yt.thumbnail_url)
     file.write("\nTitle: " + yt.title)
     file.write("\nLength: " + str(yt.length))
+    print("Content Writen!")
 
 for stream in yt.streams.filter(only_audio=True):
     print(stream)
@@ -99,7 +103,9 @@ data = {
 
 json_data = json.dumps(data, indent=4)
 
-with open('data.json', 'w') as file:
+# Absolute path of the output file
+dataLocation = os.path.join(os.path.dirname(__file__), 'data.json')
+with open(dataLocation, 'w') as file:
     file.write(json_data)
 
 

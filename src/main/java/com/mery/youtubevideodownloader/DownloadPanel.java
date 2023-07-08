@@ -83,14 +83,14 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
             .addComponent(downloadableItemScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
         );
 
-        videoThumbLabel.setText("jLabel2");
+        videoThumbLabel.setText(" ");
 
         titleLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         titleLabel.setForeground(new java.awt.Color(0, 0, 0));
-        titleLabel.setText("Why is Steam BANNING Games with AI?");
+        titleLabel.setText(" ");
 
         lengthLabel.setForeground(new java.awt.Color(51, 51, 51));
-        lengthLabel.setText("06.58");
+        lengthLabel.setText(" ");
 
         javax.swing.GroupLayout cCGradientPanel1Layout = new javax.swing.GroupLayout(cCGradientPanel1);
         cCGradientPanel1.setLayout(cCGradientPanel1Layout);
@@ -151,8 +151,9 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
         String link = linkTextField.getText();
 
         try {
-            String command = conf.interpreterLocation + " mainDownloader.py --videourl \"" + link + "\"";
+            String command = conf.interpreterLocation + " " + conf.pyModuleLocation + "mainDownloader.py --videourl \"" + link + "\"";
             Runtime runtime = Runtime.getRuntime();
+            System.out.println(command);
             Process process = runtime.exec(command);
 
             // Read the output from the process
@@ -178,7 +179,7 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
     }
 
     private void analyseData() {
-        String location = MainFrame.instance.getConfig().interpreterLocation;
+        String location = MainFrame.instance.getConfig().pyModuleLocation;
         try {
             String jsonString = new String(Files.readAllBytes(Paths.get(location + "data.json")));
             //String jsonString = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "\\PythonDownloder\\data.json")));
@@ -244,7 +245,7 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
     }
     
     private void analyseVideoInfo(){
-        String filePath = MainFrame.instance.getConfig().interpreterLocation + "\\videoInfo.txt";  // Replace with the actual file path
+        String filePath = MainFrame.instance.getConfig().pyModuleLocation + "videoInfo.txt";  // Replace with the actual file path
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -270,7 +271,8 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
             
             URL url = new URL(thumbnailUrl);
             Image thumbnail = ImageIO.read(url);
-            ImageIcon icon = new ImageIcon(thumbnail);
+            Image imgFit = thumbnail.getScaledInstance(350, 200, Image.SCALE_AREA_AVERAGING);
+            ImageIcon icon = new ImageIcon(imgFit);
             videoThumbLabel.setIcon(icon);
             titleLabel.setText(title);
             lengthLabel.setText(length/60 + " Minute(s) " + length % 60 + " Second(s)");
@@ -282,7 +284,7 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
 
     private CCDownloadableItem createDownloadElement(String res, String fileType, int itag){
         CCDownloadableItem downloadableItem = new CCDownloadableItem(res, fileType, itag);
-        downloadableItem.setSize(860, 70);
+        downloadableItem.setSize(500, 70);
         
         return downloadableItem;
     }

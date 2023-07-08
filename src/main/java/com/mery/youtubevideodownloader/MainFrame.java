@@ -3,6 +3,9 @@ package com.mery.youtubevideodownloader;
 import com.mery.youtubevideodownloader.core.Config;
 import com.mery.youtubevideodownloader.core.IPage;
 import java.awt.Dimension;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
@@ -23,9 +26,8 @@ public class MainFrame extends javax.swing.JFrame {
         
         downloadPanel = new DownloadPanel();
         
-        config = new Config("", System.getProperty("user.dir") + "\\PythonDownloader\\");
+        config = new Config("", System.getProperty("user.dir") + "\\PythonDownloder\\", "E:\\Anaconda\\python.exe");
         this.add(mainPanel);
-        
         setPage(downloadPanel);        
         
         this.setPreferredSize(new Dimension(1200, 600));
