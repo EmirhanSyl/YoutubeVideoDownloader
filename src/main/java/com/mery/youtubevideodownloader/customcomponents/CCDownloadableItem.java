@@ -25,7 +25,7 @@ public class CCDownloadableItem extends javax.swing.JPanel {
         this.res = res;
         this.fileType = fileType;
         this.itag = itag;
-        //link = MainFrame.instance.getVideoUrl();
+        link = MainFrame.instance.getVideoUrl();
 
         videoResLabel.setText(res);
         fileTypeLabel.setText(fileType);
@@ -91,8 +91,9 @@ public class CCDownloadableItem extends javax.swing.JPanel {
         Config conf = MainFrame.instance.getConfig();
         
         try {
-            String command = conf.interpreterLocation + " " + conf.pyModuleLocation + "mainDownloader.py --videourl \"" + link + "\"" + " --Download + --location \"" + conf.downloadLocation + "\" --itag " + itag;
+            String command = conf.interpreterLocation + " " + conf.pyModuleLocation + "mainDownloader.py --videourl \"" + link + "\"" + " --download --itag " + itag;
             Runtime runtime = Runtime.getRuntime();
+            System.out.println("Command: " + command);
             Process process = runtime.exec(command);
             
             // Read the output from the process

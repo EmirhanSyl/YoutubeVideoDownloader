@@ -109,7 +109,7 @@ with open(dataLocation, 'w') as file:
     file.write(json_data)
 
 
-save_location = "C:/users/emirs/Desktop/"
+save_location = os.path.join(os.path.dirname(__file__), '')
 if location is not None:
     save_location = location
 
@@ -121,3 +121,4 @@ else:
 
 if download:
     ys.download(save_location)
+    print("Content Downloaded!")
