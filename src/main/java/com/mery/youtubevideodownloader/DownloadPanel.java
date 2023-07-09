@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mery.youtubevideodownloader.customcomponents.CCDownloadableItemForHR;
 import com.mery.youtubevideodownloader.customcomponents.CCScrollBar;
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -36,6 +37,8 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
     private final String VIDEO_FILTER = "Video";
     private final String PROGRESSIVE_FILTER = "Progressive";
     private final String HR_FILTER = "HighRes";
+    
+    private int highestQualityAudioItag = -1;
     
     public DownloadPanel() {
         initComponents();
@@ -314,7 +317,11 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
                     int res = Integer.parseInt(resolution.substring(0, resolution.length() - 1));
                     if (res > 720) {
                         rowCount++;
-                        resultConteiner.add(createDownloadElement(resolution + " & " + fps + " FPS", mimeType, itag), 0);
+                        
+                        JsonObject highestAudioStream = onlyAudioStreamings.get(onlyAudioStreamings.size() - 1).getAsJsonObject();
+                        highestQualityAudioItag = highestAudioStream.get("itag").getAsInt();
+                        CCDownloadableItemForHR item = new CCDownloadableItemForHR(resolution + " & " + fps + " FPS", mimeType, itag, highestQualityAudioItag);
+                        resultConteiner.add(item, 0);
                     }
                 }
                 gridLayout.setRows(rowCount + 3);

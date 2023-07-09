@@ -24,6 +24,10 @@ public class test {
         //System.out.println(Config.downloadLocation);
         //System.out.println(Config.interpreterLocation);
         //System.out.println(Config.pyModuleLocation);
+        
+        String originalFilename = "Video.mp4";
+        String newFilename = originalFilename.replace(".webm", ".mp4");
+        System.out.println(newFilename);
     }
     
      private static void executeDownloadCommand() {

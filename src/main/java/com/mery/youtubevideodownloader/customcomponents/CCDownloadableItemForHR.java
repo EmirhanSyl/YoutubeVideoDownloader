@@ -3,10 +3,14 @@ package com.mery.youtubevideodownloader.customcomponents;
 import com.mery.youtubevideodownloader.MainFrame;
 import com.mery.youtubevideodownloader.core.Config;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -19,7 +23,7 @@ public class CCDownloadableItemForHR extends javax.swing.JPanel {
     private final String res;
     private final String fileType;
 
-    private String link;
+    private final String link;
 
     public CCDownloadableItemForHR(String res, String fileType, int itagVideo, int itagAudio) {
         initComponents();
@@ -90,16 +94,25 @@ public class CCDownloadableItemForHR extends javax.swing.JPanel {
     }//GEN-LAST:event_downloadButtonActionPerformed
 
     private void mergeVideoAndAudio(){
+        JOptionPane.showMessageDialog(this, "Video Download Will Be Started!", "Download Status Update", JOptionPane.INFORMATION_MESSAGE);
         executeDownloadCommand(itagVideo);
+        JOptionPane.showMessageDialog(this, "Audio Download Will Be Started!", "Download Status Update", JOptionPane.INFORMATION_MESSAGE);
         executeDownloadCommand(itagAudio);
         
-        String videoPath = Config.downloadLocation + 
+        String[] paths = getAudioAndVideoPaths();
         
+        File file = new File(paths[0]);
+        String fileName = file.getName();
+        String outputPath = "Merged_" + fileName.replace(".webm", ".mp4");
+        
+        JOptionPane.showMessageDialog(this, "Video And Audio Will Be Merging Now!", "Download Status Update", JOptionPane.INFORMATION_MESSAGE);
         try {
-            //String command = Config.interpreterLocation;
+            String command = Config.interpreterLocation + " " + Config.pyModuleLocation 
+                    + "\\merger.py --videoPath \"" + paths[0] + "\" --audioPath \""
+                    + paths[1] + "\" --outputPath \"" + Config.downloadLocation + "\\" + outputPath + "\"";
 
             Runtime runtime = Runtime.getRuntime();
-            System.out.println("Download Command: " + command);
+            System.out.println("Merge Command: " + command);
             Process process = runtime.exec(command);
 
             // Read the output from the process
@@ -121,11 +134,32 @@ public class CCDownloadableItemForHR extends javax.swing.JPanel {
         }
     }
     
+    private String[] getAudioAndVideoPaths(){
+        String[] result = new String[2];
+        
+        String filePath = Config.pyModuleLocation + "downloadedVideos.txt";
+        
+        ArrayList<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        result[0] = lines.get(lines.size() - 2);
+        result[1] = lines.get(lines.size() - 1);
+        return result;
+    }
+    
     private void executeDownloadCommand(int itag) {
         try {
             String command = Config.interpreterLocation + " " + Config.pyModuleLocation
                     + "mainDownloader.py --videourl \"" + link + "\"" + " --download --itag " + itag
-                    + " --location \"" + Config.downloadLocation + "\\" + MainFrame.instance.getTitle() + "\"";
+                    + " --location \"" + Config.downloadLocation + "\"";
 
             Runtime runtime = Runtime.getRuntime();
             System.out.println("Download Command: " + command);

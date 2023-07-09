@@ -125,3 +125,9 @@ if download:
     file_name = f"{sanitized_title}_{ys.itag}.{file_format}"
     ys.download(output_path=save_location, filename=file_name)
     print("Content Downloaded!")
+
+    output_file_path = os.path.join(os.path.dirname(__file__), 'downloadedVideos.txt')
+    with open(output_file_path, 'a') as file:
+        file.write(save_location + "\\" + file_name + "\n")
+        print("Content Writen!")
+
