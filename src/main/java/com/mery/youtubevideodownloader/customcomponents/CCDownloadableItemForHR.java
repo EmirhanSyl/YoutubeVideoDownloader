@@ -12,19 +12,21 @@ import java.util.logging.Logger;
  *
  * @author emirs
  */
-public class CCDownloadableItem extends javax.swing.JPanel {
+public class CCDownloadableItemForHR extends javax.swing.JPanel {
 
-    private final int itag;
+    private final int itagVideo;
+    private final int itagAudio;
     private final String res;
     private final String fileType;
 
     private String link;
 
-    public CCDownloadableItem(String res, String fileType, int itag) {
+    public CCDownloadableItemForHR(String res, String fileType, int itagVideo, int itagAudio) {
         initComponents();
         this.res = res;
         this.fileType = fileType;
-        this.itag = itag;
+        this.itagVideo = itagVideo;
+        this.itagAudio = itagAudio;
         link = MainFrame.instance.getVideoUrl();
 
         videoResLabel.setText(res);
@@ -84,27 +86,58 @@ public class CCDownloadableItem extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void downloadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_downloadButtonActionPerformed
-        executeDownloadCommand();
+        mergeVideoAndAudio();
     }//GEN-LAST:event_downloadButtonActionPerformed
 
-    private void executeDownloadCommand() {
+    private void mergeVideoAndAudio(){
+        executeDownloadCommand(itagVideo);
+        executeDownloadCommand(itagAudio);
+        
+        String videoPath = Config.downloadLocation + 
         
         try {
-            String command = Config.interpreterLocation + " " + Config.pyModuleLocation 
-                    + "mainDownloader.py --videourl \"" + link + "\"" + " --download --itag " + itag 
-                    + " --location \"" + Config.downloadLocation + "\"";
-            
+            //String command = Config.interpreterLocation;
+
             Runtime runtime = Runtime.getRuntime();
             System.out.println("Download Command: " + command);
             Process process = runtime.exec(command);
-            
+
             // Read the output from the process
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
             }
-            
+
+            // Wait for the process to finish
+            try {
+                int exitCode = process.waitFor();
+                System.out.println("Exit Code: " + exitCode);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(CCDownloadableItem.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void executeDownloadCommand(int itag) {
+        try {
+            String command = Config.interpreterLocation + " " + Config.pyModuleLocation
+                    + "mainDownloader.py --videourl \"" + link + "\"" + " --download --itag " + itag
+                    + " --location \"" + Config.downloadLocation + "\\" + MainFrame.instance.getTitle() + "\"";
+
+            Runtime runtime = Runtime.getRuntime();
+            System.out.println("Download Command: " + command);
+            Process process = runtime.exec(command);
+
+            // Read the output from the process
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
             // Wait for the process to finish
             try {
                 int exitCode = process.waitFor();
