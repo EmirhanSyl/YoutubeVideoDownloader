@@ -37,17 +37,17 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
     private final String VIDEO_FILTER = "Video";
     private final String PROGRESSIVE_FILTER = "Progressive";
     private final String HR_FILTER = "HighRes";
-    
+
     private int highestQualityAudioItag = -1;
-    
+
     public DownloadPanel() {
         initComponents();
-        
+
         ImageIcon imgIcon = new ImageIcon(System.getProperty("user.dir") + "\\assets\\icons\\settings.png");
         Image imgFit = imgIcon.getImage().getScaledInstance(40, 40, Image.SCALE_AREA_AVERAGING);
         ImageIcon icon = new ImageIcon(imgFit);
         settingsButton.setIcon(icon);
-        
+
         prepareDownloadGUI(false);
     }
 
@@ -204,8 +204,7 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
         MainFrame.instance.setPage(MainFrame.instance.getSettingsPanel());
     }//GEN-LAST:event_settingsButtonActionPerformed
 
-    
-    
+
     private void onlyAudioRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onlyAudioRBActionPerformed
         analyseData(AUDIO_FILTER);
     }//GEN-LAST:event_onlyAudioRBActionPerformed
@@ -222,8 +221,6 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
         analyseData(HR_FILTER);
     }//GEN-LAST:event_highResolutionRBActionPerformed
 
-    
-    
     private void executeDownloadCommand() {
         String link = linkTextField.getText();
 
@@ -233,17 +230,38 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
             System.out.println(command);
             Process process = runtime.exec(command);
 
-            // Read the output from the process
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-            // Wait for the process to finish
+            Thread processOutputThread = new Thread(() -> {
+                try {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(DownloadPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+            processOutputThread.start();
+            
+            Thread processErrorThread = new Thread(() -> {
+                try {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(DownloadPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+            processErrorThread.start();
+            
             try {
                 int exitCode = process.waitFor();
                 System.out.println("Exit Code: " + exitCode);
+
+                processOutputThread.join();
+                processErrorThread.join();
                 
                 analyseVideoInfo();
                 analyseData(ALL_FILTER);
@@ -304,7 +322,7 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
                 }
                 gridLayout.setRows(onlyVideoStreamings.size() + 3);
             }
-            
+
             if (filter.equals(HR_FILTER)) {
                 int rowCount = 0;
                 for (JsonElement streamElement : onlyVideoStreamings) {
@@ -317,7 +335,7 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
                     int res = Integer.parseInt(resolution.substring(0, resolution.length() - 1));
                     if (res > 720) {
                         rowCount++;
-                        
+
                         JsonObject highestAudioStream = onlyAudioStreamings.get(onlyAudioStreamings.size() - 1).getAsJsonObject();
                         highestQualityAudioItag = highestAudioStream.get("itag").getAsInt();
                         CCDownloadableItemForHR item = new CCDownloadableItemForHR(resolution + " & " + fps + " FPS", mimeType, itag, highestQualityAudioItag);
@@ -339,11 +357,11 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
                 }
                 gridLayout.setRows(progressiveStreamings.size() + 3);
             }
-            
+
             if (filter.equals(ALL_FILTER)) {
                 gridLayout.setRows(onlyAudioStreamings.size() + onlyVideoStreamings.size() + progressiveStreamings.size());
             }
-            
+
             downloadableItemScrollPane.setViewportView(resultConteiner);
 
             downloadableItemScrollPane.setVerticalScrollBar(new CCScrollBar());
@@ -355,11 +373,11 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
             e.printStackTrace();
         }
     }
-    
-    private void analyseVideoInfo(){
+
+    private void analyseVideoInfo() {
         String filePath = Config.pyModuleLocation + "videoInfo.txt";  // Replace with the actual file path
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        try ( BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             String thumbnailUrl = null;
             String title = null;
@@ -381,24 +399,24 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
             System.out.println("Title: " + title);
             MainFrame.instance.setTitle(title);
             System.out.println("Length: " + length);
-            
+
             URL url = new URL(thumbnailUrl);
             Image thumbnail = ImageIO.read(url);
             Image imgFit = thumbnail.getScaledInstance(350, 200, Image.SCALE_AREA_AVERAGING);
             ImageIcon icon = new ImageIcon(imgFit);
             videoThumbLabel.setIcon(icon);
             titleLabel.setText(title);
-            lengthLabel.setText(length/60 + " Minute(s) " + length % 60 + " Second(s)");
+            lengthLabel.setText(length / 60 + " Minute(s) " + length % 60 + " Second(s)");
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private CCDownloadableItem createDownloadElement(String res, String fileType, int itag){
+    private CCDownloadableItem createDownloadElement(String res, String fileType, int itag) {
         CCDownloadableItem downloadableItem = new CCDownloadableItem(res, fileType, itag);
         downloadableItem.setSize(500, 70);
-        
+
         return downloadableItem;
     }
 
@@ -427,8 +445,8 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
         //System.out.println(dir);
         //analyseData();
     }
-    
-    private void prepareDownloadGUI(boolean state){
+
+    private void prepareDownloadGUI(boolean state) {
         titleLabel.setVisible(state);
         videoThumbLabel.setVisible(state);
         lengthLabel.setVisible(state);
