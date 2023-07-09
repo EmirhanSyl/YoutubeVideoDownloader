@@ -45,6 +45,7 @@ public class CCDownloadableItemForHR extends javax.swing.JPanel {
         downloadButton = new com.mery.youtubevideodownloader.customcomponents.CCRoundedButton();
         videoResLabel = new javax.swing.JLabel();
         fileTypeLabel = new javax.swing.JLabel();
+        loadingIconLabel = new javax.swing.JLabel();
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setForeground(new java.awt.Color(255, 255, 255));
@@ -64,7 +65,7 @@ public class CCDownloadableItemForHR extends javax.swing.JPanel {
                 downloadButtonActionPerformed(evt);
             }
         });
-        jPanel1.add(downloadButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 10, 168, 40));
+        jPanel1.add(downloadButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(368, 10, 120, 40));
 
         videoResLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         videoResLabel.setForeground(new java.awt.Color(0, 0, 0));
@@ -75,7 +76,10 @@ public class CCDownloadableItemForHR extends javax.swing.JPanel {
         fileTypeLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         fileTypeLabel.setForeground(new java.awt.Color(0, 0, 0));
         fileTypeLabel.setText("MP4");
-        jPanel1.add(fileTypeLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 15, 160, 30));
+        jPanel1.add(fileTypeLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 15, 120, 30));
+
+        loadingIconLabel.setText(" ");
+        jPanel1.add(loadingIconLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 15, 30, 30));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -188,6 +192,7 @@ public class CCDownloadableItemForHR extends javax.swing.JPanel {
     private com.mery.youtubevideodownloader.customcomponents.CCRoundedButton downloadButton;
     private javax.swing.JLabel fileTypeLabel;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel loadingIconLabel;
     private javax.swing.JLabel videoResLabel;
     // End of variables declaration//GEN-END:variables
 }

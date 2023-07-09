@@ -19,10 +19,14 @@ import com.mery.youtubevideodownloader.customcomponents.CCScrollBar;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.Reader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 
@@ -223,54 +227,46 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
 
     private void executeDownloadCommand() {
         String link = linkTextField.getText();
+        String command = Config.interpreterLocation + " " + Config.pyModuleLocation + "mainDownloader.py --videourl \"" + link + "\"";
 
-        try {
-            String command = Config.interpreterLocation + " " + Config.pyModuleLocation + "mainDownloader.py --videourl \"" + link + "\"";
-            Runtime runtime = Runtime.getRuntime();
-            System.out.println(command);
-            Process process = runtime.exec(command);
-
-            Thread processOutputThread = new Thread(() -> {
-                try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println(line);
-                    }
-                } catch (IOException ex) {
-                    Logger.getLogger(DownloadPanel.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
-            processOutputThread.start();
-            
-            Thread processErrorThread = new Thread(() -> {
-                try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println(line);
-                    }
-                } catch (IOException ex) {
-                    Logger.getLogger(DownloadPanel.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
-            processErrorThread.start();
-            
+        Thread executionThread = new Thread(() -> {
             try {
+                ProcessBuilder processBuilder = new ProcessBuilder(command.split("\\s+"));
+                Process process = processBuilder.start();
+
+                readFile(new InputStreamReader(process.getInputStream()));
+                readFile(new InputStreamReader(process.getErrorStream()));
+
+                // Wait for the process to finish
                 int exitCode = process.waitFor();
                 System.out.println("Exit Code: " + exitCode);
 
-                processOutputThread.join();
-                processErrorThread.join();
-                
-                analyseVideoInfo();
-                analyseData(ALL_FILTER);
-            } catch (InterruptedException e) {
+                if (exitCode == 0) {
+                    videoPreparingDone();
+                } else {
+                    prepareDownloadGUI(false);
+                    JOptionPane.showMessageDialog(this, "Something went wrong while checking entered video informations! Please make sure that URL is valid and not age restricted. See for more details in Error Log", "File Path Error!", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
-        } catch (IOException ex) {
-            Logger.getLogger(CCDownloadableItem.class.getName()).log(Level.SEVERE, null, ex);
+        });
+        executionThread.start();
+
+    }
+
+    private void readFile(Reader in) throws IOException {
+        BufferedReader reader = new BufferedReader(in);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            System.out.println(line);
         }
+    }
+
+    private void videoPreparingDone() {
+
+        analyseVideoInfo();
+        analyseData(ALL_FILTER);
     }
 
     private void analyseData(String filter) {
@@ -375,9 +371,9 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
     }
 
     private void analyseVideoInfo() {
-        String filePath = Config.pyModuleLocation + "videoInfo.txt";  // Replace with the actual file path
+        String filePath = Config.pyModuleLocation + "videoInfo.txt";
 
-        try ( BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        try ( BufferedReader reader  = new BufferedReader(new InputStreamReader(new FileInputStream(filePath),StandardCharsets.UTF_8))) {
             String line;
             String thumbnailUrl = null;
             String title = null;
@@ -456,5 +452,8 @@ public class DownloadPanel extends javax.swing.JPanel implements IPage {
         progressiveRB.setVisible(state);
         highResolutionRB.setVisible(state);
         downloadableElementsPanel.setVisible(state);
+
+        ImageIcon loader = new ImageIcon(System.getProperty("user.dir") + "\\assets\\icons\\spinning-wheel-mozo.gif");
+        videoThumbLabel.setIcon(loader);
     }
 }

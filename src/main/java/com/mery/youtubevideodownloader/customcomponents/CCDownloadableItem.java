@@ -2,11 +2,15 @@ package com.mery.youtubevideodownloader.customcomponents;
 
 import com.mery.youtubevideodownloader.MainFrame;
 import com.mery.youtubevideodownloader.core.Config;
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -18,7 +22,7 @@ public class CCDownloadableItem extends javax.swing.JPanel {
     private final String res;
     private final String fileType;
 
-    private String link;
+    private final String link;
 
     public CCDownloadableItem(String res, String fileType, int itag) {
         initComponents();
@@ -29,6 +33,10 @@ public class CCDownloadableItem extends javax.swing.JPanel {
 
         videoResLabel.setText(res);
         fileTypeLabel.setText(fileType);
+        
+        ImageIcon loading = new ImageIcon(System.getProperty("user.dir") + "\\assets\\icons\\spinning-wheel-mozo-little.gif");
+        loadingIconLabel.setIcon(loading);
+        loadingIconLabel.setVisible(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -39,6 +47,7 @@ public class CCDownloadableItem extends javax.swing.JPanel {
         downloadButton = new com.mery.youtubevideodownloader.customcomponents.CCRoundedButton();
         videoResLabel = new javax.swing.JLabel();
         fileTypeLabel = new javax.swing.JLabel();
+        loadingIconLabel = new javax.swing.JLabel();
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setForeground(new java.awt.Color(255, 255, 255));
@@ -58,7 +67,7 @@ public class CCDownloadableItem extends javax.swing.JPanel {
                 downloadButtonActionPerformed(evt);
             }
         });
-        jPanel1.add(downloadButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 10, 168, 40));
+        jPanel1.add(downloadButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(368, 10, 120, 40));
 
         videoResLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         videoResLabel.setForeground(new java.awt.Color(0, 0, 0));
@@ -69,7 +78,10 @@ public class CCDownloadableItem extends javax.swing.JPanel {
         fileTypeLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         fileTypeLabel.setForeground(new java.awt.Color(0, 0, 0));
         fileTypeLabel.setText("MP4");
-        jPanel1.add(fileTypeLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 15, 160, 30));
+        jPanel1.add(fileTypeLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 15, 120, 30));
+
+        loadingIconLabel.setText(" ");
+        jPanel1.add(loadingIconLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 15, 30, 30));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -88,39 +100,69 @@ public class CCDownloadableItem extends javax.swing.JPanel {
     }//GEN-LAST:event_downloadButtonActionPerformed
 
     private void executeDownloadCommand() {
-        
-        try {
-            String command = Config.interpreterLocation + " " + Config.pyModuleLocation 
-                    + "mainDownloader.py --videourl \"" + link + "\"" + " --download --itag " + itag 
-                    + " --location \"" + Config.downloadLocation + "\"";
-            
-            Runtime runtime = Runtime.getRuntime();
-            System.out.println("Download Command: " + command);
-            Process process = runtime.exec(command);
-            
-            // Read the output from the process
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-            
-            // Wait for the process to finish
+        String command = Config.interpreterLocation + " " + Config.pyModuleLocation
+                + "mainDownloader.py --videourl \"" + link + "\"" + " --download --itag " + itag
+                + " --location \"" + Config.downloadLocation + "\"";
+
+        Thread executionThread = new Thread(() -> {
             try {
+                ImageIcon loading = new ImageIcon(System.getProperty("user.dir") + "\\assets\\icons\\spinning-wheel-mozo-little.gif");
+                loadingIconLabel.setIcon(loading);
+                loadingIconLabel.setVisible(true);
+                downloadButton.setEnabled(false);
+                
+                ProcessBuilder processBuilder = new ProcessBuilder(command.split("\\s+"));
+                Process process = processBuilder.start();
+
+                readFile(new InputStreamReader(process.getInputStream()));
+                readFile(new InputStreamReader(process.getErrorStream()));
+
+                // Wait for the process to finish
                 int exitCode = process.waitFor();
                 System.out.println("Exit Code: " + exitCode);
-            } catch (InterruptedException e) {
+
+                if (exitCode == 0) {
+                    JOptionPane.showMessageDialog(this, "Video/Audio Downloaded Successfully!", "Downloaded!", JOptionPane.INFORMATION_MESSAGE);
+                    openDownloadedResourceDirectory();
+                    
+                    loadingIconLabel.setVisible(false);
+                    downloadButton.setEnabled(true);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Something went wrong while downloading video/audio! See for more details in Error Log", "Download Error!", JOptionPane.ERROR_MESSAGE);
+                    ImageIcon error = new ImageIcon(System.getProperty("user.dir") + "\\assets\\icons\\warning.png");
+                    Image imgFit = error.getImage().getScaledInstance(350, 200, Image.SCALE_AREA_AVERAGING);
+                    ImageIcon icon = new ImageIcon(imgFit);
+                    loadingIconLabel.setIcon(icon);
+                    downloadButton.setEnabled(true);
+                }
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
+                Logger.getLogger(CCDownloadableItem.class.getName()).log(Level.SEVERE, null, e);
             }
-        } catch (IOException ex) {
-            Logger.getLogger(CCDownloadableItem.class.getName()).log(Level.SEVERE, null, ex);
+        });
+        executionThread.start();
+
+    }
+
+    private void readFile(Reader in) throws IOException {
+        BufferedReader reader = new BufferedReader(in);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            System.out.println(line);
         }
+    }
+    
+    private void openDownloadedResourceDirectory() throws IOException{
+        String command = "explorer " + Config.downloadLocation; 
+        ProcessBuilder processBuilder = new ProcessBuilder(command.split("\\s+"));
+        processBuilder.start();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.mery.youtubevideodownloader.customcomponents.CCRoundedButton downloadButton;
     private javax.swing.JLabel fileTypeLabel;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel loadingIconLabel;
     private javax.swing.JLabel videoResLabel;
     // End of variables declaration//GEN-END:variables
 }

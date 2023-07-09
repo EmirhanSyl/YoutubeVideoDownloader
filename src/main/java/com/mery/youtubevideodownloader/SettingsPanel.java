@@ -3,13 +3,9 @@ package com.mery.youtubevideodownloader;
 import com.mery.youtubevideodownloader.core.Config;
 import com.mery.youtubevideodownloader.core.IPage;
 import java.awt.Image;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -18,16 +14,16 @@ import javax.swing.JOptionPane;
  *
  * @author emirs
  */
-public class SettingsPanel extends javax.swing.JPanel implements IPage{
+public class SettingsPanel extends javax.swing.JPanel implements IPage {
 
     public SettingsPanel() {
         initComponents();
-        
+
         ImageIcon imgIcon = new ImageIcon(System.getProperty("user.dir") + "\\assets\\icons\\settings.png");
         Image imgFit = imgIcon.getImage().getScaledInstance(40, 40, Image.SCALE_AREA_AVERAGING);
         ImageIcon icon = new ImageIcon(imgFit);
         settingsButton.setIcon(icon);
-        
+
         ImageIcon imgIcon2 = new ImageIcon(System.getProperty("user.dir") + "\\assets\\icons\\folder.png");
         Image imgFit2 = imgIcon2.getImage().getScaledInstance(45, 45, Image.SCALE_AREA_AVERAGING);
         ImageIcon icon2 = new ImageIcon(imgFit2);
@@ -36,7 +32,6 @@ public class SettingsPanel extends javax.swing.JPanel implements IPage{
         pyModuleLocBtn.setIcon(icon2);
     }
 
-    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -192,17 +187,16 @@ public class SettingsPanel extends javax.swing.JPanel implements IPage{
     }// </editor-fold>//GEN-END:initComponents
 
     private void settingsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_settingsButtonActionPerformed
-             MainFrame.instance.setPage(MainFrame.instance.getDownloadPanel());
+        MainFrame.instance.setPage(MainFrame.instance.getDownloadPanel());
     }//GEN-LAST:event_settingsButtonActionPerformed
 
     private void pyModuleLocBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pyModuleLocBtnActionPerformed
         String path = getChosenFilePath();
         if (!"".equals(path)) {
             Path file = Paths.get(path + "\\mainDownloader.py");
-            if(Files.exists(file) && Files.isExecutable(file)){
-                 pyModuleLocField.setText(path);
-            }
-            else{
+            if (Files.exists(file) && Files.isExecutable(file)) {
+                pyModuleLocField.setText(path);
+            } else {
                 JOptionPane.showMessageDialog(this, "The required Python modules are not found or required privilages are not provided!", "File Path Error!", JOptionPane.ERROR_MESSAGE);
             }
         }
@@ -216,10 +210,9 @@ public class SettingsPanel extends javax.swing.JPanel implements IPage{
         String path = getChosenFilePath();
         if (!"".equals(path)) {
             Path file = Paths.get(path + "\\python.exe");
-            if(Files.exists(file) && Files.isExecutable(file)){
-                 interpreterLocField.setText(path + "\\python.exe");
-            }
-            else{
+            if (Files.exists(file) && Files.isExecutable(file)) {
+                interpreterLocField.setText(path + "\\python.exe");
+            } else {
                 JOptionPane.showMessageDialog(this, "The required python.exe file not found!", "File Path Error!", JOptionPane.ERROR_MESSAGE);
             }
         }
@@ -227,9 +220,11 @@ public class SettingsPanel extends javax.swing.JPanel implements IPage{
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         Config.updateConfigFile(downloadLocField.getText(), pyModuleLocField.getText(), interpreterLocField.getText());
+
+        JOptionPane.showMessageDialog(this, "All Settings Saved Successfuly!", "Settings Saved!", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_saveButtonActionPerformed
 
-    private String getChosenFilePath(){
+    private String getChosenFilePath() {
         String fileLocation = "";
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -237,11 +232,11 @@ public class SettingsPanel extends javax.swing.JPanel implements IPage{
         int userChoice = fileChooser.showSaveDialog(null);
 
         if (userChoice == JFileChooser.APPROVE_OPTION) {
-            fileLocation = fileChooser.getSelectedFile().getPath();                
+            fileLocation = fileChooser.getSelectedFile().getPath();
         } else if (userChoice == JFileChooser.CANCEL_OPTION) {
             System.out.println("Operation canceled by the user.");
         }
-        
+
         return fileLocation;
     }
 
