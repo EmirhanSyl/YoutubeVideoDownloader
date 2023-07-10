@@ -2,14 +2,17 @@ package com.mery.youtubevideodownloader.customcomponents;
 
 import com.mery.youtubevideodownloader.MainFrame;
 import com.mery.youtubevideodownloader.core.Config;
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 /**
@@ -94,58 +97,54 @@ public class CCDownloadableItemForHR extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void downloadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_downloadButtonActionPerformed
-        mergeVideoAndAudio();
+        ImageIcon loading = new ImageIcon(System.getProperty("user.dir") + "\\assets\\icons\\spinning-wheel-mozo-little.gif");
+        loadingIconLabel.setIcon(loading);
+        loadingIconLabel.setVisible(true);
+        downloadButton.setEnabled(false);
+
+        executeDownloadCommand(itagAudio, false);
+        executeDownloadCommand(itagVideo, true);
+
     }//GEN-LAST:event_downloadButtonActionPerformed
 
-    private void mergeVideoAndAudio(){
-        JOptionPane.showMessageDialog(this, "Video Download Will Be Started!", "Download Status Update", JOptionPane.INFORMATION_MESSAGE);
-        executeDownloadCommand(itagVideo);
-        JOptionPane.showMessageDialog(this, "Audio Download Will Be Started!", "Download Status Update", JOptionPane.INFORMATION_MESSAGE);
-        executeDownloadCommand(itagAudio);
-        
+    private void mergeVideoAndAudio() {
         String[] paths = getAudioAndVideoPaths();
-        
-        File file = new File(paths[0]);
+
+        File file = new File(paths[1]);
         String fileName = file.getName();
         String outputPath = "Merged_" + fileName.replace(".webm", ".mp4");
-        
+
         JOptionPane.showMessageDialog(this, "Video And Audio Will Be Merging Now!", "Download Status Update", JOptionPane.INFORMATION_MESSAGE);
         try {
-            String command = Config.interpreterLocation + " " + Config.pyModuleLocation 
-                    + "\\merger.py --videoPath \"" + paths[0] + "\" --audioPath \""
-                    + paths[1] + "\" --outputPath \"" + Config.downloadLocation + "\\" + outputPath + "\"";
+            String command = Config.interpreterLocation + " " + Config.pyModuleLocation
+                    + "\\merger.py --videoPath \"" + paths[1] + "\" --audioPath \""
+                    + paths[0] + "\" --outputPath \"" + Config.downloadLocation + "\\" + outputPath + "\"";
 
             Runtime runtime = Runtime.getRuntime();
             System.out.println("Merge Command: " + command);
             Process process = runtime.exec(command);
 
-            // Read the output from the process
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
+            readFile(new InputStreamReader(process.getInputStream()));
+            readFile(new InputStreamReader(process.getErrorStream()));
 
-            // Wait for the process to finish
-            try {
-                int exitCode = process.waitFor();
-                System.out.println("Exit Code: " + exitCode);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } catch (IOException ex) {
+            int exitCode = process.waitFor();
+            System.out.println("Exit Code: " + exitCode);
+
+            loadingIconLabel.setVisible(false);
+            downloadButton.setEnabled(true);
+        } catch (IOException | InterruptedException ex) {
             Logger.getLogger(CCDownloadableItem.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    private String[] getAudioAndVideoPaths(){
+
+    private String[] getAudioAndVideoPaths() {
         String[] result = new String[2];
-        
+
         String filePath = Config.pyModuleLocation + "downloadedVideos.txt";
-        
+
         ArrayList<String> lines = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            
+        try ( BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+
             String line;
             while ((line = reader.readLine()) != null) {
                 lines.add(line);
@@ -153,38 +152,57 @@ public class CCDownloadableItemForHR extends javax.swing.JPanel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         result[0] = lines.get(lines.size() - 2);
         result[1] = lines.get(lines.size() - 1);
         return result;
     }
-    
-    private void executeDownloadCommand(int itag) {
-        try {
-            String command = Config.interpreterLocation + " " + Config.pyModuleLocation
-                    + "mainDownloader.py --videourl \"" + link + "\"" + " --download --itag " + itag
-                    + " --location \"" + Config.downloadLocation + "\"";
 
-            Runtime runtime = Runtime.getRuntime();
-            System.out.println("Download Command: " + command);
-            Process process = runtime.exec(command);
+    private void executeDownloadCommand(int itag, boolean startMerge) {
+        String command = Config.interpreterLocation + " " + Config.pyModuleLocation
+                + "mainDownloader.py --videourl \"" + link + "\"" + " --download --itag " + itag
+                + " --location \"" + Config.downloadLocation + "\"";
 
-            // Read the output from the process
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-            // Wait for the process to finish
+        Thread executionThread = new Thread(() -> {
             try {
+                ProcessBuilder processBuilder = new ProcessBuilder(command.split("\\s+"));
+                Process process = processBuilder.start();
+
+                readFile(new InputStreamReader(process.getInputStream()));
+                readFile(new InputStreamReader(process.getErrorStream()));
+
+                // Wait for the process to finish
                 int exitCode = process.waitFor();
                 System.out.println("Exit Code: " + exitCode);
-            } catch (InterruptedException e) {
+
+                if (exitCode == 0) {
+                    JOptionPane.showMessageDialog(this, "Video/Audio Downloaded Successfully!", "Downloaded!", JOptionPane.INFORMATION_MESSAGE);
+
+                    if (startMerge) {
+                        mergeVideoAndAudio();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Something went wrong while downloading video/audio! See for more details in Error Log", "Download Error!", JOptionPane.ERROR_MESSAGE);
+                    ImageIcon error = new ImageIcon(System.getProperty("user.dir") + "\\assets\\icons\\warning.png");
+                    Image imgFit = error.getImage().getScaledInstance(350, 200, Image.SCALE_AREA_AVERAGING);
+                    ImageIcon icon = new ImageIcon(imgFit);
+                    loadingIconLabel.setIcon(icon);
+                    downloadButton.setEnabled(true);
+                }
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
+                Logger.getLogger(CCDownloadableItem.class.getName()).log(Level.SEVERE, null, e);
             }
-        } catch (IOException ex) {
-            Logger.getLogger(CCDownloadableItem.class.getName()).log(Level.SEVERE, null, ex);
+        });
+        executionThread.start();
+
+    }
+
+    private void readFile(Reader in) throws IOException {
+        BufferedReader reader = new BufferedReader(in);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            System.out.println(line);
         }
     }
 
