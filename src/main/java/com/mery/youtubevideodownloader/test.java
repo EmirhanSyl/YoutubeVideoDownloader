@@ -87,6 +87,7 @@ public class test {
 
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(command.split("\\s+"));
+            System.out.println(command);
             Process process = processBuilder.start();
 
             readFile(new InputStreamReader(process.getInputStream()));
